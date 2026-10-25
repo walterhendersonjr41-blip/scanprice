@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScanPrice — point your camera, see what things cost</title>
+<style>
+:root{--p:#22e3a1}*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#05070a;color:#e8eef2}
+header{padding:20px 18px 6px;max-width:900px;margin:auto}h1{margin:0;font-size:1.8rem}h1 span{color:var(--p)}
+.note{max-width:900px;margin:10px auto;padding:12px 16px;border:1px solid var(--p);border-radius:12px;background:#0c1a15;font-size:.95rem}
+#stage{position:relative;max-width:900px;margin:12px auto;aspect-ratio:16/10;background:#111;border-radius:14px;overflow:hidden;border:1px solid #233}
+#stage video,#stage svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tag{position:absolute;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);border:1px solid var(--p);color:#fff;border-radius:10px;padding:4px 10px;font-size:.9rem;white-space:nowrap;animation:pop .35s ease-out both}
+.tag b{color:var(--p);font-family:ui-monospace,monospace;margin-left:6px}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-30%) scale(.8)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+#hud{position:absolute;top:10px;left:10px;background:#000a;border-radius:20px;padding:4px 12px;font:13px ui-monospace,monospace;color:var(--p);z-index:5}
+.btns{max-width:900px;margin:auto;display:flex;gap:10px;padding:0 18px;flex-wrap:wrap}
+button{background:var(--p);color:#022;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:1rem;cursor:pointer}button.alt{background:#1c2a26;color:#e8eef2}
+section{max-width:900px;margin:22px auto;padding:0 18px}li{margin:4px 0}footer{max-width:900px;margin:30px auto;padding:0 18px 40px;opacity:.6;font-size:.85rem}
+</style></head><body>
+<header><h1>Scan<span>Price</span></h1><p>Point your phone camera at a room. Every few seconds the app snaps a frame, an AI vision model names up to 8 objects it sees and estimates a realistic US market price for each, and price tags float over the live picture.</p></header>
+<div class="note"><b>Demo page.</b> The real app runs on Base44 (login + AI vision). This GitHub Pages copy has <b>no AI and sends nothing anywhere</b>: the camera picture stays on your device and the price tags are <b>simulated sample prices</b>, not real estimates.</div>
+<div id="stage"><div id="hud">DEMO · tap a button below</div>
+<svg id="scene" viewBox="0 0 160 100" aria-label="Illustrated sample desk scene">
+<rect width="160" height="100" fill="#2b3440"/><rect y="68" width="160" height="32" fill="#6b4f3a"/>
+<rect x="18" y="34" width="46" height="30" rx="2" fill="#1a1f26" stroke="#9aa" stroke-width=".6"/><rect x="21" y="37" width="40" height="23" fill="#3a6ea5"/><rect x="12" y="64" width="58" height="4" rx="1" fill="#aab"/>
+<rect x="82" y="52" width="12" height="16" rx="2" fill="#e6e1d6"/><path d="M94 56q6 0 6 5t-6 5" fill="none" stroke="#e6e1d6" stroke-width="2"/>
+<rect x="110" y="56" width="16" height="12" fill="#b5653d"/><circle cx="118" cy="46" r="11" fill="#2f8f4e"/><circle cx="111" cy="50" r="6" fill="#3aa35c"/><circle cx="125" cy="49" r="6" fill="#3aa35c"/>
+<rect x="136" y="20" width="4" height="48" fill="#444"/><path d="M128 20h20l-4-10h-12z" fill="#e8c35a"/>
+<rect x="72" y="74" width="26" height="10" rx="2" fill="#222"/><rect x="40" y="76" width="22" height="7" rx="3" fill="#ddd"/>
+</svg></div>
+<div class="btns"><button id="cam">Use my camera</button><button class="alt" id="samp">Sample scene</button></div>
+<section><h2>How the real app works</h2><ul>
+<li>Full-screen camera view with a 5-second countdown between scans and a scan counter.</li>
+<li>Each scan uploads one frame and asks the AI for JSON: up to 8 items with a short name, a USD price and the item's position (% of width/height).</li>
+<li>Animated price tags are placed over each item; a new scan replaces them.</li>
+<li>Built with Base44 (React + Tailwind, Base44 auth, Core.UploadFile and Core.InvokeLLM integrations).</li></ul>
+<p>The production build is a compiled Base44 bundle tied to Base44's backend, so it isn't included; this page shows the idea.</p></section>
+<footer>Created by Walter Henderson Jr. Sample prices are made up for the demo.</footer>
+<script>
+var stage=document.getElementById('stage'),hud=document.getElementById('hud'),scene=document.getElementById('scene'),timer,count=0,video;
+var SAMPLE=[["Laptop",649,26,50],["Coffee mug",12,56,60],["Potted plant",28,74,48],["Desk lamp",39,86,22],["Wireless mouse",24,32,79],["Keyboard",45,53,79]];
+var POOL=[["Phone",399],["Water bottle",18],["Headphones",79],["Notebook",6],["Chair",120],["Backpack",55],["Sunglasses",25],["Book",14],["Watch",150],["Pen",2]];
+function clear(){[].slice.call(stage.querySelectorAll('.tag')).forEach(function(t){t.remove()})}
+function tag(n,p,x,y,i){var d=document.createElement('div');d.className='tag';d.style.left=x+'%';d.style.top=y+'%';d.style.animationDelay=(i*0.12)+'s';d.innerHTML='';d.appendChild(document.createTextNode(n));var b=document.createElement('b');b.textContent='$'+p;d.appendChild(b);stage.appendChild(d)}
+function loop(fn){clearInterval(timer);var c=5;fn();timer=setInterval(function(){c--;if(c<=0){c=5;fn()}hud.textContent='DEMO · next scan in '+c+'s · scans '+count},1000)}
+document.getElementById('samp').onclick=function(){if(video){video.srcObject&&video.srcObject.getTracks().forEach(function(t){t.stop()});video.remove();video=null}scene.style.display='';
+ loop(function(){count++;clear();SAMPLE.forEach(function(s,i){var j=Math.round(s[1]*(0.9+Math.random()*0.2));tag(s[0],j,s[2],s[3],i)})})};
+document.getElementById('cam').onclick=function(){if(!navigator.mediaDevices){hud.textContent='Camera not available here; try Sample scene';return}
+ navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(st){if(!video){video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;stage.insertBefore(video,stage.firstChild)}video.srcObject=st;video.play();scene.style.display='none';
+ loop(function(){count++;clear();var pick=POOL.slice().sort(function(){return Math.random()-.5}).slice(0,4);pick.forEach(function(s,i){tag(s[0]+' (sample)',s[1],15+Math.random()*70,15+Math.random()*70,i)})})}).catch(function(){hud.textContent='Camera blocked; showing Sample scene';document.getElementById('samp').click()})};
+</script></body></html>
