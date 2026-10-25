@@ -1,23 +1,30 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ScanPrice — point your camera, see what things cost</title>
+<meta name="description" content="Point your phone camera at a room and see what things are worth. Free, no sign-up.">
 <style>
-:root{--p:#22e3a1}*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#05070a;color:#e8eef2}
-header{padding:20px 18px 6px;max-width:900px;margin:auto}h1{margin:0;font-size:1.8rem}h1 span{color:var(--p)}
-.note{max-width:900px;margin:10px auto;padding:12px 16px;border:1px solid var(--p);border-radius:12px;background:#0c1a15;font-size:.95rem}
-#stage{position:relative;max-width:900px;margin:12px auto;aspect-ratio:16/10;background:#111;border-radius:14px;overflow:hidden;border:1px solid #233}
-#stage video,#stage svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.tag{position:absolute;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);border:1px solid var(--p);color:#fff;border-radius:10px;padding:4px 10px;font-size:.9rem;white-space:nowrap;animation:pop .35s ease-out both}
+:root{--p:#22e3a1}*{box-sizing:border-box}body{margin:0;font:17px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#05070a;color:#e8eef2}
+header{padding:18px 18px 4px;max-width:900px;margin:auto}h1{margin:0;font-size:1.9rem}h1 span{color:var(--p)}header p{margin:6px 0 0;opacity:.85}
+#stage{position:relative;max-width:900px;margin:12px auto;aspect-ratio:4/3;background:#111;border-radius:14px;overflow:hidden;border:1px solid #233}
+#stage video,#stage img,#stage svg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.tag{position:absolute;transform:translate(-50%,-50%);background:rgba(0,0,0,.78);border:2px solid var(--p);color:#fff;border-radius:12px;padding:5px 11px;font-size:1rem;white-space:nowrap;animation:pop .35s ease-out both;z-index:4}
 .tag b{color:var(--p);font-family:ui-monospace,monospace;margin-left:6px}
 @keyframes pop{from{opacity:0;transform:translate(-50%,-30%) scale(.8)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-#hud{position:absolute;top:10px;left:10px;background:#000a;border-radius:20px;padding:4px 12px;font:13px ui-monospace,monospace;color:var(--p);z-index:5}
-.btns{max-width:900px;margin:auto;display:flex;gap:10px;padding:0 18px;flex-wrap:wrap}
-button{background:var(--p);color:#022;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:1rem;cursor:pointer}button.alt{background:#1c2a26;color:#e8eef2}
-section{max-width:900px;margin:22px auto;padding:0 18px}li{margin:4px 0}footer{max-width:900px;margin:30px auto;padding:0 18px 40px;opacity:.6;font-size:.85rem}
-</style></head><body>
-<header><h1>Scan<span>Price</span></h1><p>Point your phone camera at a room. Every few seconds the app snaps a frame, an AI vision model names up to 8 objects it sees and estimates a realistic US market price for each, and price tags float over the live picture.</p></header>
-<div class="note"><b>Demo page.</b> The real app runs on Base44 (login + AI vision). This GitHub Pages copy has <b>no AI and sends nothing anywhere</b>: the camera picture stays on your device and the price tags are <b>simulated sample prices</b>, not real estimates.</div>
-<div id="stage"><div id="hud">DEMO · tap a button below</div>
-<svg id="scene" viewBox="0 0 160 100" aria-label="Illustrated sample desk scene">
+#hud{position:absolute;top:10px;left:10px;right:10px;background:#000b;border-radius:20px;padding:6px 14px;font:15px system-ui,sans-serif;color:var(--p);z-index:5;text-align:center}
+.btns{max-width:900px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px}
+button,.filebtn{background:var(--p);color:#022;border:0;border-radius:14px;padding:14px 16px;font-weight:800;font-size:1.1rem;cursor:pointer;min-height:58px;text-align:center;display:flex;align-items:center;justify-content:center}
+button.alt,.filebtn{background:#1c2a26;color:#e8eef2}button.big{grid-column:1/-1;font-size:1.25rem;min-height:66px}button:disabled{opacity:.5}
+section{max-width:900px;margin:18px auto;padding:0 18px}
+#list{list-style:none;padding:0;margin:0}#list li{display:flex;justify-content:space-between;gap:10px;padding:12px 4px;border-bottom:1px solid #1d2b27}#list li b{color:var(--p);font-family:ui-monospace,monospace}
+#total{font-size:1.3rem;font-weight:800;margin:10px 0}.muted{opacity:.7;font-size:.92rem}
+.ask{display:flex;gap:8px}.ask input{flex:1;min-height:56px;border-radius:14px;border:2px solid #2b3d38;background:#0c1512;color:#fff;font-size:1.05rem;padding:0 14px}
+#askOut{white-space:pre-wrap;margin-top:10px;padding:12px;border-radius:12px;background:#0c1a15;display:none}
+footer{max-width:900px;margin:30px auto;padding:0 18px 100px;opacity:.6;font-size:.85rem}
+</style>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#05070a"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="icons/icon-192.png">
+</head><body>
+<header><h1>Scan<span>Price</span></h1><p>Point your camera at a room. It spots things and shows what each one is worth. Free, no sign-up.</p></header>
+<div id="stage"><div id="hud">Tap <b>Start scanning</b> or <b>Use a photo</b></div>
+<svg id="scene" viewBox="0 0 160 100" aria-label="Sample desk scene">
 <rect width="160" height="100" fill="#2b3440"/><rect y="68" width="160" height="32" fill="#6b4f3a"/>
 <rect x="18" y="34" width="46" height="30" rx="2" fill="#1a1f26" stroke="#9aa" stroke-width=".6"/><rect x="21" y="37" width="40" height="23" fill="#3a6ea5"/><rect x="12" y="64" width="58" height="4" rx="1" fill="#aab"/>
 <rect x="82" y="52" width="12" height="16" rx="2" fill="#e6e1d6"/><path d="M94 56q6 0 6 5t-6 5" fill="none" stroke="#e6e1d6" stroke-width="2"/>
@@ -25,24 +32,70 @@ section{max-width:900px;margin:22px auto;padding:0 18px}li{margin:4px 0}footer{m
 <rect x="136" y="20" width="4" height="48" fill="#444"/><path d="M128 20h20l-4-10h-12z" fill="#e8c35a"/>
 <rect x="72" y="74" width="26" height="10" rx="2" fill="#222"/><rect x="40" y="76" width="22" height="7" rx="3" fill="#ddd"/>
 </svg></div>
-<div class="btns"><button id="cam">Use my camera</button><button class="alt" id="samp">Sample scene</button></div>
-<section><h2>How the real app works</h2><ul>
-<li>Full-screen camera view with a 5-second countdown between scans and a scan counter.</li>
-<li>Each scan uploads one frame and asks the AI for JSON: up to 8 items with a short name, a USD price and the item's position (% of width/height).</li>
-<li>Animated price tags are placed over each item; a new scan replaces them.</li>
-<li>Built with Base44 (React + Tailwind, Base44 auth, Core.UploadFile and Core.InvokeLLM integrations).</li></ul>
-<p>The production build is a compiled Base44 bundle tied to Base44's backend, so it isn't included; this page shows the idea.</p></section>
-<footer>Created by Walter Henderson Jr. Sample prices are made up for the demo.</footer>
+<div class="btns">
+<button class="big" id="cam">📷 Start scanning</button>
+<label class="filebtn" for="file">🖼️ Use a photo</label><input id="file" type="file" accept="image/*" hidden>
+<button class="alt" id="samp">Sample scene</button>
+</div>
+<section id="found" hidden><h2>What it found</h2><ul id="list"></ul><div id="total"></div>
+<div class="btns" style="padding:0"><button class="alt" id="share">📋 Share / copy list</button><button class="alt" id="clearList">Clear list</button></div>
+<p class="muted">Great for a home inventory for insurance. Prices are rough AI guesses of typical US used value, not an appraisal.</p></section>
+<section><h2>What's it worth?</h2><p class="muted">Type anything (brand and model help), like “Dewalt 20V drill” or “2015 Honda Civic 120k miles”.</p>
+<div class="ask"><input id="askIn" placeholder="Type an item…" aria-label="Item to price"><button id="askBtn" style="min-width:90px">Price it</button></div><div id="askOut" aria-live="polite"></div></section>
+<footer>Created by Walter Henderson Jr. Object spotting runs on your phone (TensorFlow.js COCO-SSD); pictures are never uploaded. Only item names (never pictures) are sent to a free AI to guess prices. Prices are estimates only.</footer>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="ai-helper.js"></script>
 <script>
-var stage=document.getElementById('stage'),hud=document.getElementById('hud'),scene=document.getElementById('scene'),timer,count=0,video;
-var SAMPLE=[["Laptop",649,26,50],["Coffee mug",12,56,60],["Potted plant",28,74,48],["Desk lamp",39,86,22],["Wireless mouse",24,32,79],["Keyboard",45,53,79]];
-var POOL=[["Phone",399],["Water bottle",18],["Headphones",79],["Notebook",6],["Chair",120],["Backpack",55],["Sunglasses",25],["Book",14],["Watch",150],["Pen",2]];
-function clear(){[].slice.call(stage.querySelectorAll('.tag')).forEach(function(t){t.remove()})}
-function tag(n,p,x,y,i){var d=document.createElement('div');d.className='tag';d.style.left=x+'%';d.style.top=y+'%';d.style.animationDelay=(i*0.12)+'s';d.innerHTML='';d.appendChild(document.createTextNode(n));var b=document.createElement('b');b.textContent='$'+p;d.appendChild(b);stage.appendChild(d)}
-function loop(fn){clearInterval(timer);var c=5;fn();timer=setInterval(function(){c--;if(c<=0){c=5;fn()}hud.textContent='DEMO · next scan in '+c+'s · scans '+count},1000)}
-document.getElementById('samp').onclick=function(){if(video){video.srcObject&&video.srcObject.getTracks().forEach(function(t){t.stop()});video.remove();video=null}scene.style.display='';
- loop(function(){count++;clear();SAMPLE.forEach(function(s,i){var j=Math.round(s[1]*(0.9+Math.random()*0.2));tag(s[0],j,s[2],s[3],i)})})};
-document.getElementById('cam').onclick=function(){if(!navigator.mediaDevices){hud.textContent='Camera not available here; try Sample scene';return}
- navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(st){if(!video){video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;stage.insertBefore(video,stage.firstChild)}video.srcObject=st;video.play();scene.style.display='none';
- loop(function(){count++;clear();var pick=POOL.slice().sort(function(){return Math.random()-.5}).slice(0,4);pick.forEach(function(s,i){tag(s[0]+' (sample)',s[1],15+Math.random()*70,15+Math.random()*70,i)})})}).catch(function(){hud.textContent='Camera blocked; showing Sample scene';document.getElementById('samp').click()})};
+var $=function(i){return document.getElementById(i)};
+var stage=$('stage'),hud=$('hud'),scene=$('scene'),video=null,img=null,timer=null,model=null,scans=0,busy=false;
+var PRICES={};try{PRICES=JSON.parse(localStorage.getItem('sp_prices')||'{}')}catch(e){}
+var FOUND={};try{FOUND=JSON.parse(localStorage.getItem('sp_found')||'{}')}catch(e){}
+var SAMPLE=[["laptop",26,50],["cup",56,60],["potted plant",74,48],["lamp",86,22],["mouse",32,79],["keyboard",53,79]];
+function money(n){return '$'+Math.round(n).toLocaleString('en-US')}
+function clearTags(){[].slice.call(stage.querySelectorAll('.tag')).forEach(function(t){t.remove()})}
+function tag(n,p,x,y,i){x=Math.max(14,Math.min(86,x));y=Math.max(14,Math.min(92,y));var d=document.createElement('div');d.className='tag';d.style.left=x+'%';d.style.top=y+'%';d.style.animationDelay=(i*0.1)+'s';d.appendChild(document.createTextNode(n));var b=document.createElement('b');b.textContent=p;d.appendChild(b);stage.appendChild(d)}
+function priceText(n){var p=PRICES[n];return p?(p.low&&p.high&&p.high!==p.low?money(p.low)+'–'+money(p.high):money(p.typical||p.low||0)):'…'}
+function tagText(n){var p=PRICES[n];return p?'~'+money(p.typical||p.low||0):'…'}
+async function priceNames(names){
+  var need=names.filter(function(n){return !PRICES[n]});if(!need.length)return true;
+  try{var t=await AIHelper.ask('You estimate typical US secondhand market prices. Reply with ONLY JSON: an object whose keys are the item names given, each value {"low":number,"high":number,"typical":number} in US dollars for an ordinary used household example. No text outside JSON.',need.join(', '),{raw:true});
+    var j=AIHelper.parseJSON(t);if(!j)throw 0;
+    Object.keys(j).forEach(function(k){var v=j[k];if(v&&typeof v==='object'&&(+v.typical||+v.low))PRICES[k.toLowerCase()]={low:+v.low||0,high:+v.high||0,typical:+v.typical||+v.low||0}});
+    localStorage.setItem('sp_prices',JSON.stringify(PRICES));return true}
+  catch(e){hud.textContent='The free price AI is busy — prices will fill in on the next scan';return false}}
+function renderList(){var k=Object.keys(FOUND);$('found').hidden=!k.length;var tot=0;
+  $('list').innerHTML='';k.forEach(function(n){var p=PRICES[n],li=document.createElement('li');var c=FOUND[n];
+    li.appendChild(document.createTextNode((c>1?c+' × ':'')+n));var b=document.createElement('b');b.textContent=priceText(n);li.appendChild(b);$('list').appendChild(li);if(p)tot+=(p.typical||0)*c});
+  $('total').textContent=tot?'Estimated total: '+money(tot):'';}
+function addFound(counts){var ch=false;Object.keys(counts).forEach(function(n){if((FOUND[n]||0)<counts[n]){FOUND[n]=counts[n];ch=true}});if(ch){localStorage.setItem('sp_found',JSON.stringify(FOUND))}renderList()}
+async function loadModel(){if(model)return model;if(!window.cocoSsd){hud.textContent='Could not load the object spotter. Check your internet and reload.';throw 0}
+  hud.textContent='Loading the object spotter (first time takes a few seconds)…';model=await cocoSsd.load({base:'lite_mobilenet_v2'});return model}
+async function detect(el,w,h){if(busy)return;busy=true;try{await loadModel();var preds=(await model.detect(el,12)).filter(function(p){return p.score>0.5&&p.class!=='person'});scans++;
+  var counts={};preds.forEach(function(p){counts[p.class]=(counts[p.class]||0)+1});var names=Object.keys(counts);
+  // map from element pixels to % of the stage (object-fit:contain)
+  var sw=stage.clientWidth,sh=stage.clientHeight,sc=Math.min(sw/w,sh/h),ox=(sw-w*sc)/2,oy=(sh-h*sc)/2;
+  function draw(){clearTags();preds.slice(0,8).forEach(function(p,i){var x=(ox+(p.bbox[0]+p.bbox[2]/2)*sc)/sw*100,y=(oy+(p.bbox[1]+p.bbox[3]/2)*sc)/sh*100;tag(p.class,tagText(p.class),x,y,i)})}
+  draw();hud.textContent=names.length?'Found '+preds.length+' item'+(preds.length>1?'s':'')+' · scan '+scans:'Nothing recognized yet — point at furniture, electronics, appliances… · scan '+scans;
+  if(names.length){addFound(counts);if(await priceNames(names)){draw();renderList()}}}
+  catch(e){}busy=false}
+function stopCam(){clearInterval(timer);timer=null;if(video){video.srcObject&&video.srcObject.getTracks().forEach(function(t){t.stop()});video.remove();video=null}$('cam').textContent='📷 Start scanning'}
+function clearMedia(){stopCam();if(img){img.remove();img=null}scene.style.display='none';clearTags()}
+$('cam').onclick=function(){if(timer){stopCam();hud.textContent='Stopped. Tap Start scanning to go again.';return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){hud.textContent='Camera not available here. Tap Use a photo instead.';return}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(st){clearMedia();video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;stage.insertBefore(video,stage.firstChild);video.srcObject=st;video.play();
+    $('cam').textContent='⏹ Stop scanning';var go=function(){if(video&&video.videoWidth)detect(video,video.videoWidth,video.videoHeight)};setTimeout(go,800);timer=setInterval(go,4000)})
+  .catch(function(){hud.textContent='Camera blocked. Allow the camera in your browser, or tap Use a photo.'})};
+$('file').onchange=function(){var f=this.files&&this.files[0];if(!f)return;clearMedia();img=new Image();img.alt='Your photo';img.onload=function(){detect(img,img.naturalWidth,img.naturalHeight)};img.onerror=function(){hud.textContent='Could not open that picture. Try another.'};img.src=URL.createObjectURL(f);stage.insertBefore(img,stage.firstChild);this.value=''};
+$('samp').onclick=async function(){clearMedia();scene.style.display='';hud.textContent='Sample scene · getting prices…';var names=SAMPLE.map(function(s){return s[0]});
+  SAMPLE.forEach(function(s,i){tag(s[0],tagText(s[0]),s[1],s[2],i)});var ok=await priceNames(names);clearTags();SAMPLE.forEach(function(s,i){tag(s[0],tagText(s[0]),s[1],s[2],i)});if(ok)hud.textContent='Sample scene · AI price estimates'};
+$('clearList').onclick=function(){FOUND={};localStorage.removeItem('sp_found');renderList()};
+$('share').onclick=function(){var k=Object.keys(FOUND),txt='My ScanPrice list:\n'+k.map(function(n){return (FOUND[n]>1?FOUND[n]+' x ':'')+n+' — '+priceText(n)}).join('\n')+'\n'+$('total').textContent;
+  if(navigator.share)navigator.share({title:'ScanPrice list',text:txt}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){$('share').textContent='✅ Copied'});};
+async function askPrice(){var q=$('askIn').value.trim(),o=$('askOut');if(!q){$('askIn').focus();return}o.style.display='block';o.textContent='Looking it up…';$('askBtn').disabled=true;
+  try{o.textContent=await AIHelper.ask('You estimate US prices for items people type in. Give: a typical used price range, a typical new price if it is still sold, and one short tip on where to sell or buy it. Under 70 words. Say it is a rough estimate.',q)}
+  catch(e){o.textContent='The free AI is busy right now. Try again in a minute.'}$('askBtn').disabled=false}
+$('askBtn').onclick=askPrice;$('askIn').addEventListener('keydown',function(e){if(e.key==='Enter')askPrice()});
+renderList();
+if('serviceWorker' in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 </script></body></html>
